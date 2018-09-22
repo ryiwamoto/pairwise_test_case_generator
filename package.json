@@ -1,0 +1,60 @@
+{
+  "name": "pair-wise-test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "ssh://git@bitbucket.org/ryiwamoto/pair-wise-test.git",
+  "author": "ryiwamoto <konnpekigan@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/classnames": "^2.2.6",
+    "@types/clipboard": "^2.0.1",
+    "@types/jest": "^23.3.2",
+    "@types/node": "^10.9.4",
+    "@types/react": "^16.4.14",
+    "@types/react-dom": "^16.0.7",
+    "@types/react-redux": "^6.0.7",
+    "@types/redux": "^3.6.0",
+    "bulma": "^0.7.1",
+    "classnames": "^2.2.6",
+    "clipboard": "^2.0.1",
+    "highlight.js": "^9.12.0",
+    "jest": "^23.5.0",
+    "parcel-bundler": "^1.9.7",
+    "react": "^16.5.0",
+    "react-dom": "^16.5.0",
+    "react-redux": "^5.0.7",
+    "redux": "^4.0.0",
+    "redux-persist": "^5.10.0",
+    "redux-thunk": "^2.3.0",
+    "ts-jest": "^23.1.4",
+    "tslint": "^5.11.0",
+    "tslint-config-prettier": "^1.15.0",
+    "tslint-react": "^3.6.0",
+    "typescript": "^3.0.3"
+  },
+  "scripts": {
+    "build": "rm -rf docs && parcel build ./gui/index.html --out-dir ./docs --public-url ./",
+    "build-watch": "parcel ./gui/index.html",
+    "test": "jest",
+    "test-watch": "jest --watch"
+  },
+  "jest": {
+    "transform": {
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "testRegex": "/__tests__/.*spec\\.(ts|tsx|js)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ],
+    "globals": {
+      "ts-jest": {
+        "useBabelrc": true
+      }
+    }
+  }
+}
