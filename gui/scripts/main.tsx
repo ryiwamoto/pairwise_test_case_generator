@@ -15,6 +15,7 @@ const initStore = {
 
 const persistedReducer = persist.persistReducer(
   {
+    version: 3,
     key: "root",
     storage
   },

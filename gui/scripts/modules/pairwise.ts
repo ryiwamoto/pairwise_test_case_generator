@@ -3,6 +3,7 @@ import { AppStore } from "../main";
 import { createSlots, PairWise } from "../../../core";
 import { filterModels } from "./filterModels";
 import { ResultFormat } from "./resultFormat";
+import { start } from "repl";
 
 export enum PairwiseActionType {
   ROW_WAS_ADDED = "pairwise/row/add",
@@ -20,82 +21,16 @@ export enum PairwiseActionType {
   RESULT_FORMAT_WAS_CHANGED = "pairwise/format/change"
 }
 
-interface RowWasAddedAction {
-  type: PairwiseActionType.ROW_WAS_ADDED;
-}
-
-interface RowWasDeletedAction {
-  type: PairwiseActionType.ROW_WAS_DELETED;
-
-  payload: {
-    rowIndex: number;
-  };
-}
-
-interface ColWasAddedAction {
-  type: PairwiseActionType.COL_WAS_ADDED;
-
-  payload: {
-    rowIndex: number;
-  };
-}
-
-interface ColWasUpdatedAction {
-  type: PairwiseActionType.COL_WAS_UPDATED;
-  payload: {
-    rowIndex: number;
-    colIndex: number;
-    value: string;
-  };
-}
-
-interface ColWasDeletedAction {
-  type: PairwiseActionType.COL_WAS_DELETED;
-  payload: {
-    rowIndex: number;
-    colIndex: number;
-  };
-}
-
-interface NameWasUpdatedAction {
-  type: PairwiseActionType.NAME_WAS_UPDATED;
-  payload: {
-    rowIndex: number;
-    name: string;
-  };
-}
-
-interface GenerationWasStartedAction {
-  type: PairwiseActionType.GENERATION_IS_STARTED;
-}
-
-interface GenerationWasEndedAction {
-  type: PairwiseActionType.GENERATION_IS_ENDED;
-
-  payload: {
-    filteredModels: PairwiseModel[];
-    result: number[][];
-  };
-}
-
-interface ResultFormatWasChangedAction {
-  type: PairwiseActionType.RESULT_FORMAT_WAS_CHANGED;
-
-  payload: {
-    format: ResultFormat;
-  };
-}
-
 type PairwiseAction =
-  | RowWasAddedAction
-  | RowWasDeletedAction
-  | ColWasAddedAction
-  | ColWasUpdatedAction
-  | ColWasDeletedAction
-  | NameWasUpdatedAction
-  | GenerationWasStartedAction
-  | GenerationWasEndedAction
-  | ResultFormatWasChangedAction;
+  | ReturnType<typeof addRow>
+  | ReturnType<typeof updateRowName>
+  | ReturnType<typeof deleteRow>
+  | ReturnType<typeof addCol>
+  | ReturnType<typeof updateCol>
+  | ReturnType<typeof deleteCol>
+  | ReturnType<typeof startGeneration>
+  | ReturnType<typeof endGeneration>
+  | ReturnType<typeof changeResultFormat>;
 
 export interface PairwiseModel {
   name: string;
@@ -103,8 +38,23 @@ export interface PairwiseModel {
   values: string[];
 }
 
+type ColFocus = {
+  type: "col";
+  row: number;
+  col: number;
+};
+
+type RowFocus = {
+  type: "row";
+  row: number;
+};
+
+export type Focus = ColFocus | RowFocus | null;
+
 export interface PairwiseStore {
   models: PairwiseModel[];
+
+  focus: Focus;
 
   filteredModels: PairwiseModel[];
 
@@ -119,6 +69,7 @@ const defaultModel: PairwiseModel = { name: "", values: [""] };
 
 export const initPairwiseStore = (): PairwiseStore => ({
   models: [defaultModel],
+  focus: null,
   filteredModels: [],
   result: [],
   format: ResultFormat.Table,
@@ -133,41 +84,55 @@ export function pairwiseReducer(
     case PairwiseActionType.ROW_WAS_ADDED:
       return {
         ...state,
-        models: [...state.models, defaultModel]
+        models: [...state.models, defaultModel],
+        focus: { type: "row", row: state.models.length }
       };
     case PairwiseActionType.ROW_WAS_DELETED:
+      const { rowIndex } = action.payload;
       return {
         ...state,
-        models: state.models.filter((_, i) => i !== action.payload.rowIndex)
+        models: state.models.filter((_, i) => i !== rowIndex),
+        focus: {
+          type: "col",
+          row: rowIndex - 1,
+          col: state.models[rowIndex - 1].values.length - 1
+        }
       };
-    case PairwiseActionType.COL_WAS_ADDED:
+    case PairwiseActionType.COL_WAS_ADDED: {
+      const { rowIndex } = action.payload;
       return {
         ...state,
-        models: state.models.map(
-          (m, i) =>
-            i === action.payload.rowIndex
-              ? { ...m, values: [...m.values, ""] }
-              : m
-        )
+        models: state.models.map((m, i) =>
+          i === rowIndex ? { ...m, values: [...m.values, ""] } : m
+        ),
+        focus: {
+          type: "col",
+          row: rowIndex,
+          col: state.models[rowIndex].values.length
+        }
       };
+    }
     case PairwiseActionType.COL_WAS_UPDATED:
       return {
         ...state,
         models: updateRow(state.models, action.payload.rowIndex, r => ({
           ...r,
-          values: r.values.map(
-            (v, i) => (i === action.payload.colIndex ? action.payload.value : v)
+          values: r.values.map((v, i) =>
+            i === action.payload.colIndex ? action.payload.value : v
           )
         }))
       };
-    case PairwiseActionType.COL_WAS_DELETED:
+    case PairwiseActionType.COL_WAS_DELETED: {
+      const { rowIndex, colIndex } = action.payload;
       return {
         ...state,
-        models: updateRow(state.models, action.payload.rowIndex, r => ({
+        models: updateRow(state.models, rowIndex, r => ({
           ...r,
-          values: r.values.filter((v, i) => i !== action.payload.colIndex)
-        }))
+          values: r.values.filter((v, i) => i !== colIndex)
+        })),
+        focus: { type: "col", row: rowIndex, col: colIndex - 1 }
       };
+    }
     case PairwiseActionType.NAME_WAS_UPDATED:
       return {
         ...state,
@@ -210,19 +175,19 @@ function updateRow(
   ];
 }
 
-export const addRow = (): RowWasAddedAction => ({
-  type: PairwiseActionType.ROW_WAS_ADDED
+export const addRow = () => ({
+  type: PairwiseActionType.ROW_WAS_ADDED as const
 });
 
-export const deleteRow = (rowIndex: number): RowWasDeletedAction => ({
-  type: PairwiseActionType.ROW_WAS_DELETED,
+export const deleteRow = (rowIndex: number) => ({
+  type: PairwiseActionType.ROW_WAS_DELETED as const,
   payload: {
     rowIndex
   }
 });
 
-export const addCol = (rowIndex: number): ColWasAddedAction => ({
-  type: PairwiseActionType.COL_WAS_ADDED,
+export const addCol = (rowIndex: number) => ({
+  type: PairwiseActionType.COL_WAS_ADDED as const,
   payload: {
     rowIndex
   }
@@ -232,8 +197,8 @@ export const updateCol = (
   rowIndex: number,
   colIndex: number,
   value: string
-): ColWasUpdatedAction => ({
-  type: PairwiseActionType.COL_WAS_UPDATED,
+) => ({
+  type: PairwiseActionType.COL_WAS_UPDATED as const,
   payload: {
     rowIndex,
     colIndex,
@@ -241,22 +206,16 @@ export const updateCol = (
   }
 });
 
-export const deleteCol = (
-  rowIndex: number,
-  colIndex: number
-): ColWasDeletedAction => ({
-  type: PairwiseActionType.COL_WAS_DELETED,
+export const deleteCol = (rowIndex: number, colIndex: number) => ({
+  type: PairwiseActionType.COL_WAS_DELETED as const,
   payload: {
     rowIndex,
     colIndex
   }
 });
 
-export const updateRowName = (
-  rowIndex: number,
-  name: string
-): NameWasUpdatedAction => ({
-  type: PairwiseActionType.NAME_WAS_UPDATED,
+export const updateRowName = (rowIndex: number, name: string) => ({
+  type: PairwiseActionType.NAME_WAS_UPDATED as const,
   payload: {
     rowIndex,
     name
@@ -277,25 +236,23 @@ export const genereateTestCase = (): ThunkAction<
   dispatch(endGeneration(filteredModels, result));
 };
 
-export const startGeneration = (): GenerationWasStartedAction => ({
-  type: PairwiseActionType.GENERATION_IS_STARTED
+export const startGeneration = () => ({
+  type: PairwiseActionType.GENERATION_IS_STARTED as const
 });
 
 export const endGeneration = (
   filteredModels: PairwiseModel[],
   result: number[][]
-): GenerationWasEndedAction => ({
-  type: PairwiseActionType.GENERATION_IS_ENDED,
+) => ({
+  type: PairwiseActionType.GENERATION_IS_ENDED as const,
   payload: {
     filteredModels,
     result
   }
 });
 
-export const changeResultFormat = (
-  format: ResultFormat
-): ResultFormatWasChangedAction => ({
-  type: PairwiseActionType.RESULT_FORMAT_WAS_CHANGED,
+export const changeResultFormat = (format: ResultFormat) => ({
+  type: PairwiseActionType.RESULT_FORMAT_WAS_CHANGED as const,
   payload: {
     format
   }

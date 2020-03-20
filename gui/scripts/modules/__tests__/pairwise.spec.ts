@@ -17,6 +17,7 @@ import { ResultFormat } from "../resultFormat";
 describe("pairwiseModule", () => {
   const defaultStore: PairwiseStore = {
     models: [],
+    focus: null,
     filteredModels: [],
     result: [],
     format: ResultFormat.Table,

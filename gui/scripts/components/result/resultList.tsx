@@ -1,11 +1,30 @@
 import * as React from "react";
-import { PairwiseModel } from "../../modules/pairwise";
+import { PairwiseModel, changeResultFormat } from "../../modules/pairwise";
 import { ResultTable } from "./resultTable";
 import { ResultFormat } from "../../modules/resultFormat";
 import { ResultJSONCode } from "./resultJSONCode";
 import { ResultListTab } from "./resultListTab";
+import { useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppStore } from "../../main";
 
-export interface ResultListProps {
+interface ResultListProps {}
+
+export function ResultList(props: ResultListProps) {
+  const dispatch = useDispatch();
+  const onChange = useCallback(
+    (format: ResultFormat) => dispatch(changeResultFormat(format)),
+    []
+  );
+  const states = useSelector((store: AppStore) => ({
+    format: store.pairwise.format,
+    models: store.pairwise.filteredModels,
+    result: store.pairwise.result
+  }));
+  return <ResultListPresenter {...states} onChange={onChange} />;
+}
+
+interface ResultListPresenterProps {
   format: ResultFormat;
   models: PairwiseModel[];
   result: number[][];
@@ -13,15 +32,9 @@ export interface ResultListProps {
   onChange: (format: ResultFormat) => void;
 }
 
-interface ResultProps {
-  models: PairwiseModel[];
-
-  result: number[][];
-}
-
 const allFormats = [ResultFormat.Table, ResultFormat.JSON];
 
-export function ResultList(props: ResultListProps) {
+export function ResultListPresenter(props: ResultListPresenterProps) {
   const Result = getSuitableResultComponent(props.format);
   return props.result.length === 0 ? null : (
     <>
@@ -41,6 +54,12 @@ export function ResultList(props: ResultListProps) {
       <Result result={props.result} models={props.models} />
     </>
   );
+}
+
+interface ResultProps {
+  models: PairwiseModel[];
+
+  result: number[][];
 }
 
 function getSuitableResultComponent(

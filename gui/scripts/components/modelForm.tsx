@@ -1,12 +1,33 @@
 import * as React from "react";
-import { RowFormContainer } from "../containers/rowFormContainer";
+import { useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { AppStore } from "../main";
+import { addRow, genereateTestCase } from "../modules/pairwise";
+import { RowForm } from "./rowForm";
+
 
 export interface Parameter {
   name: string;
   values: string[];
 }
 
-export interface ModelFormProps {
+export interface ModelFormProps {}
+
+export function ModelForm() {
+  const dispatch = useDispatch();
+  const parameters = useSelector((store: AppStore) => store.pairwise.models);
+  const onAddRow = useCallback(() => dispatch(addRow()), []);
+  const onSubmit = useCallback(() => dispatch(genereateTestCase()), []);
+  return (
+    <ModelFormPresenter
+      parameters={parameters}
+      onAddRow={onAddRow}
+      onSubmit={onSubmit}
+    />
+  );
+}
+
+interface ModelFormPresenterProps {
   parameters: Parameter[];
 
   onAddRow: () => void;
@@ -14,43 +35,40 @@ export interface ModelFormProps {
   onSubmit: () => void;
 }
 
-export class ModelForm extends React.PureComponent<ModelFormProps> {
-  public render() {
-    return (
-      <>
-        <h2 className="subtitle">Input test models</h2>
-        <form onSubmit={this.onSubmit}>
-          {this.props.parameters.map((p, i) => (
-            <RowFormContainer
-              rowIndex={i}
-              key={i}
-              isDeletable={this.props.parameters.length > 1}
-            />
-          ))}
-          <div className="field parameter-form-group">
-            <a className="plus-button row-plus-button" onClick={this.onAddRow}>
-              <i className="fas fa-plus" />
-            </a>
-          </div>
-          <a
-            className="button is-primary generate-button"
-            onClick={this.onSubmitButton}
-          >
-            Generate
-          </a>
-        </form>
-      </>
-    );
-  }
-
-  private onSubmit = (e: React.FormEvent) => {
+function ModelFormPresenter(props: ModelFormPresenterProps) {
+  const onSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
-  };
+  }, []);
 
-  private onSubmitButton = (e: React.FormEvent) => {
+  const onSubmitButton = useCallback((e: React.FormEvent) => {
     e.preventDefault();
-    this.props.onSubmit();
-  };
+    props.onSubmit();
+  }, []);
 
-  private onAddRow = () => this.props.onAddRow();
+  const onAddRow = useCallback(() => props.onAddRow(), []);
+  return (
+    <>
+      <h2 className="subtitle">Input test models</h2>
+      <form onSubmit={onSubmit}>
+        {props.parameters.map((p, i) => (
+          <RowForm
+            rowIndex={i}
+            key={i}
+            isDeletable={props.parameters.length > 1}
+          />
+        ))}
+        <div className="field parameter-form-group">
+          <button className="plus-button row-plus-button" onClick={onAddRow}>
+            <i className="fas fa-plus" />
+          </button>
+        </div>
+        <a
+          className="button is-primary generate-button"
+          onClick={onSubmitButton}
+        >
+          Generate
+        </a>
+      </form>
+    </>
+  );
 }

@@ -1,15 +1,15 @@
 import * as React from "react";
-import { ModelFormContainer } from "../containers/modelFormContainer";
-import { ResultListContainer } from "../containers/resultListContainer";
+import { ModelForm } from "./modelForm";
+import { ResultList } from "./result/resultList";
 
 export function App() {
   return (
     <div className="container">
       <section key="section-1">
-        <ModelFormContainer />
+        <ModelForm />
       </section>
       <section key="section-2">
-        <ResultListContainer />
+        <ResultList />
       </section>
     </div>
   );
