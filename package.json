@@ -6,31 +6,31 @@
   "author": "ryiwamoto <konnpekigan@gmail.com>",
   "license": "MIT",
   "devDependencies": {
-    "@types/classnames": "^2.2.9",
+    "@types/classnames": "^2.2.10",
     "@types/clipboard": "^2.0.1",
-    "@types/jest": "^24.0.24",
-    "@types/node": "^13.1.0",
-    "@types/react": "^16.9.17",
-    "@types/react-dom": "^16.9.4",
-    "@types/react-redux": "^7.1.5",
+    "@types/jest": "^25.1.4",
+    "@types/node": "^13.9.2",
+    "@types/react": "^16.9.23",
+    "@types/react-dom": "^16.9.5",
+    "@types/react-redux": "^7.1.7",
     "@types/redux": "^3.6.0",
     "bulma": "^0.8.0",
     "classnames": "^2.2.6",
-    "clipboard": "^2.0.4",
-    "highlight.js": "^9.17.1",
-    "jest": "^24.9.0",
+    "clipboard": "^2.0.6",
+    "highlight.js": "^9.18.1",
+    "jest": "^25.1.0",
     "parcel-bundler": "^1.12.4",
-    "react": "^16.12.0",
-    "react-dom": "^16.12.0",
-    "react-redux": "^7.1.3",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-redux": "^7.2.0",
     "redux": "^4.0.5",
     "redux-persist": "^6.0.0",
     "redux-thunk": "^2.3.0",
-    "ts-jest": "^24.2.0",
-    "tslint": "^5.20.1",
+    "ts-jest": "^25.2.1",
+    "tslint": "^6.1.0",
     "tslint-config-prettier": "^1.18.0",
-    "tslint-react": "^4.1.0",
-    "typescript": "^3.7.4"
+    "tslint-react": "^4.2.0",
+    "typescript": "^3.8.3"
   },
   "scripts": {
     "build": "rm -rf docs && parcel build ./gui/index.html --out-dir ./docs --public-url ./",
@@ -39,9 +39,7 @@
     "test-watch": "jest --watch"
   },
   "jest": {
-    "transform": {
-      "^.+\\.tsx?$": "ts-jest"
-    },
+    "preset": "ts-jest",
     "testRegex": "/__tests__/.*spec\\.(ts|tsx|js)$",
     "moduleFileExtensions": [
       "ts",
@@ -50,11 +48,6 @@
       "jsx",
       "json",
       "node"
-    ],
-    "globals": {
-      "ts-jest": {
-        "useBabelrc": true
-      }
-    }
+    ]
   }
 }
