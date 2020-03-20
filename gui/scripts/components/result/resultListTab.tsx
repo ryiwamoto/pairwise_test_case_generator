@@ -1,6 +1,7 @@
 import * as React from "react";
 import { ResultFormat } from "../../modules/resultFormat";
 import classnames from "classnames";
+import { useCallback } from "react";
 
 export interface ResultListTabProps {
   currentFormat: ResultFormat;
@@ -8,23 +9,20 @@ export interface ResultListTabProps {
   onClick: (format: ResultFormat) => void;
 }
 
-export class ResultListTab extends React.PureComponent<ResultListTabProps> {
-  public render() {
-    return (
-      <li
-        className={classnames({
-          "is-active": this.props.currentFormat === this.props.format
-        })}
-        onClick={this.onClick}
-      >
-        <a>{toTabname(this.props.format)}</a>
-      </li>
-    );
-  }
-
-  private onClick = () => {
-    this.props.onClick(this.props.format);
-  };
+export function ResultListTab(props: ResultListTabProps) {
+  const onClick = useCallback(() => {
+    props.onClick(props.format);
+  }, []);
+  return (
+    <li
+      className={classnames({
+        "is-active": props.currentFormat === props.format
+      })}
+      onClick={onClick}
+    >
+      <a>{toTabname(props.format)}</a>
+    </li>
+  );
 }
 
 function toTabname(format: ResultFormat) {

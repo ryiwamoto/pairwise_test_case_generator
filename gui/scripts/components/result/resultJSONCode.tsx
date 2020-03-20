@@ -21,9 +21,11 @@ export function toJSONCode(
   models: PairwiseModel[],
   result: number[][]
 ): string {
+  const keys = models.map(_ => _.name).join(", ");
   const arrays = result.map(line => line.map((v, i) => models[i].values[v]));
   return (
     "[\n" +
+    `  // [${keys}]\n` +
     arrays
       .map(line => `  [${line.map(v => valueToCode(v)).join(", ")}]`)
       .join(",\n") +
