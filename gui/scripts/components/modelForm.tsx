@@ -2,9 +2,8 @@ import * as React from "react";
 import { useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppStore } from "../main";
-import { addRow, genereateTestCase } from "../modules/pairwise";
+import { addRow, genereateTestCase, changeAutoCast } from "../modules/pairwise";
 import { RowForm } from "./rowForm";
-
 
 export interface Parameter {
   name: string;
@@ -31,7 +30,6 @@ interface ModelFormPresenterProps {
   parameters: Parameter[];
 
   onAddRow: () => void;
-
   onSubmit: () => void;
 }
 
@@ -62,12 +60,12 @@ function ModelFormPresenter(props: ModelFormPresenterProps) {
             <i className="fas fa-plus" />
           </button>
         </div>
-        <a
+        <button
           className="button is-primary generate-button"
           onClick={onSubmitButton}
         >
           Generate
-        </a>
+        </button>
       </form>
     </>
   );

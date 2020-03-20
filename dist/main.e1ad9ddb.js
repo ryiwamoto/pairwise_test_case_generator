@@ -29750,7 +29750,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports.pairwiseReducer = pairwiseReducer;
-exports.changeResultFormat = exports.endGeneration = exports.startGeneration = exports.genereateTestCase = exports.updateRowName = exports.deleteCol = exports.updateCol = exports.addCol = exports.deleteRow = exports.addRow = exports.initPairwiseStore = exports.PairwiseActionType = void 0;
+exports.changeAutoCast = exports.changeResultFormat = exports.endGeneration = exports.startGeneration = exports.genereateTestCase = exports.updateRowName = exports.deleteCol = exports.updateCol = exports.addCol = exports.deleteRow = exports.addRow = exports.initPairwiseStore = exports.PairwiseActionType = void 0;
 
 var _core = require("../../../core");
 
@@ -29785,6 +29785,7 @@ exports.PairwiseActionType = PairwiseActionType;
   PairwiseActionType["GENERATION_IS_STARTED"] = "pairwise/generation/start";
   PairwiseActionType["GENERATION_IS_ENDED"] = "pairwise/generation/end";
   PairwiseActionType["RESULT_FORMAT_WAS_CHANGED"] = "pairwise/format/change";
+  PairwiseActionType["CHANGE_AUTO_CAST"] = "pairwise/autocast";
 })(PairwiseActionType || (exports.PairwiseActionType = PairwiseActionType = {}));
 
 var defaultModel = {
@@ -29799,6 +29800,7 @@ var initPairwiseStore = function initPairwiseStore() {
     filteredModels: [],
     result: [],
     format: _resultFormat.ResultFormat.Table,
+    autoCast: true,
     isGenerating: false
   };
 };
@@ -29905,6 +29907,11 @@ function pairwiseReducer() {
     case PairwiseActionType.RESULT_FORMAT_WAS_CHANGED:
       return _objectSpread({}, state, {
         format: action.payload.format
+      });
+
+    case PairwiseActionType.CHANGE_AUTO_CAST:
+      return _objectSpread({}, state, {
+        autoCast: action.payload.value
       });
 
     default:
@@ -30026,6 +30033,17 @@ var changeResultFormat = function changeResultFormat(format) {
 };
 
 exports.changeResultFormat = changeResultFormat;
+
+var changeAutoCast = function changeAutoCast(value) {
+  return {
+    type: PairwiseActionType.CHANGE_AUTO_CAST,
+    payload: {
+      value: value
+    }
+  };
+};
+
+exports.changeAutoCast = changeAutoCast;
 },{"../../../core":"../core/index.ts","./filterModels":"scripts/modules/filterModels.ts","./resultFormat":"scripts/modules/resultFormat.ts"}],"../node_modules/react-is/cjs/react-is.development.js":[function(require,module,exports) {
 /** @license React v16.12.0
  * react-is.development.js
@@ -32970,7 +32988,7 @@ function ModelFormPresenter(props) {
     onClick: onAddRow
   }, React.createElement("i", {
     className: "fas fa-plus"
-  }))), React.createElement("a", {
+  }))), React.createElement("button", {
     className: "button is-primary generate-button",
     onClick: onSubmitButton
   }, "Generate")));
@@ -35648,20 +35666,41 @@ exports.toJSONCode = toJSONCode;
 
 var React = _interopRequireWildcard(require("react"));
 
+var _pairwise = require("../../modules/pairwise");
+
 var _hilightedCode = require("./hilightedCode");
+
+var _reactRedux = require("react-redux");
 
 function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function ResultJSONCode(props) {
-  return React.createElement(_hilightedCode.HighlightedCode, {
-    language: "javascript",
-    code: toJSONCode(props.models, props.result)
+  var dispatch = (0, _reactRedux.useDispatch)();
+  var onChange = (0, React.useCallback)(function (e) {
+    dispatch((0, _pairwise.changeAutoCast)(e.currentTarget.checked));
+  }, []);
+  var isAutoCastEnabled = (0, _reactRedux.useSelector)(function (store) {
+    return store.pairwise.autoCast;
   });
+  return React.createElement(React.Fragment, null, React.createElement(_hilightedCode.HighlightedCode, {
+    language: "javascript",
+    code: toJSONCode(props.models, props.result, isAutoCastEnabled)
+  }), React.createElement("div", {
+    className: "field"
+  }, React.createElement("div", {
+    className: "control"
+  }, React.createElement("label", {
+    className: "checkbox"
+  }, React.createElement("input", {
+    type: "checkbox",
+    checked: isAutoCastEnabled,
+    onChange: onChange
+  }), "Cast values to primitive"))));
 }
 
-function toJSONCode(models, result) {
+function toJSONCode(models, result, autoCast) {
   var keys = models.map(function (_) {
     return _.name;
   }).join(", ");
@@ -35672,16 +35711,29 @@ function toJSONCode(models, result) {
   });
   return "[\n" + "  // [".concat(keys, "]\n") + arrays.map(function (line) {
     return "  [".concat(line.map(function (v) {
-      return valueToCode(v);
+      return valueToCode(v, autoCast);
     }).join(", "), "]");
   }).join(",\n") + "\n]\n";
 }
 
-function valueToCode(value) {
-  var n = parseFloat(value);
-  return isNaN(n) ? "\"".concat(value, "\"") : value;
+function valueToCode(value, autoCast) {
+  if (!autoCast) {
+    return "\"".concat(value, "\"");
+  }
+
+  switch (value) {
+    case "true":
+      return "true";
+
+    case "false":
+      return "false";
+
+    default:
+      var n = parseFloat(value);
+      return isNaN(n) ? "\"".concat(value, "\"") : value;
+  }
 }
-},{"react":"../node_modules/react/index.js","./hilightedCode":"scripts/components/result/hilightedCode.tsx"}],"scripts/components/result/resultListTab.tsx":[function(require,module,exports) {
+},{"react":"../node_modules/react/index.js","../../modules/pairwise":"scripts/modules/pairwise.ts","./hilightedCode":"scripts/components/result/hilightedCode.tsx","react-redux":"../node_modules/react-redux/es/index.js"}],"scripts/components/result/resultListTab.tsx":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -37310,7 +37362,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53581" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53932" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

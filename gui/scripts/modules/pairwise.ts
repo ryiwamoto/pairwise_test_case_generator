@@ -18,7 +18,9 @@ export enum PairwiseActionType {
   GENERATION_IS_STARTED = "pairwise/generation/start",
   GENERATION_IS_ENDED = "pairwise/generation/end",
 
-  RESULT_FORMAT_WAS_CHANGED = "pairwise/format/change"
+  RESULT_FORMAT_WAS_CHANGED = "pairwise/format/change",
+
+  CHANGE_AUTO_CAST = "pairwise/autocast"
 }
 
 type PairwiseAction =
@@ -30,7 +32,8 @@ type PairwiseAction =
   | ReturnType<typeof deleteCol>
   | ReturnType<typeof startGeneration>
   | ReturnType<typeof endGeneration>
-  | ReturnType<typeof changeResultFormat>;
+  | ReturnType<typeof changeResultFormat>
+  | ReturnType<typeof changeAutoCast>;
 
 export interface PairwiseModel {
   name: string;
@@ -62,6 +65,8 @@ export interface PairwiseStore {
 
   format: ResultFormat;
 
+  autoCast: boolean;
+
   isGenerating: boolean;
 }
 
@@ -73,6 +78,7 @@ export const initPairwiseStore = (): PairwiseStore => ({
   filteredModels: [],
   result: [],
   format: ResultFormat.Table,
+  autoCast: true,
   isGenerating: false
 });
 
@@ -157,6 +163,11 @@ export function pairwiseReducer(
       return {
         ...state,
         format: action.payload.format
+      };
+    case PairwiseActionType.CHANGE_AUTO_CAST:
+      return {
+        ...state,
+        autoCast: action.payload.value
       };
     default:
       return state;
@@ -256,4 +267,9 @@ export const changeResultFormat = (format: ResultFormat) => ({
   payload: {
     format
   }
+});
+
+export const changeAutoCast = (value: boolean) => ({
+  type: PairwiseActionType.CHANGE_AUTO_CAST as const,
+  payload: { value }
 });
