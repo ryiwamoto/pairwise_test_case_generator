@@ -35821,13 +35821,15 @@ function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } if (obj === null || typeof obj !== "object" && typeof obj !== "function") { return { default: obj }; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
 
 function App() {
-  return React.createElement("div", {
+  return React.createElement(React.Fragment, null, React.createElement("h1", {
+    className: "title"
+  }, "Pairwise test case generator"), React.createElement("div", {
     className: "container"
   }, React.createElement("section", {
     key: "section-1"
   }, React.createElement(_modelForm.ModelForm, null)), React.createElement("section", {
     key: "section-2"
-  }, React.createElement(_resultList.ResultList, null)));
+  }, React.createElement(_resultList.ResultList, null))));
 }
 },{"react":"../node_modules/react/index.js","./modelForm":"scripts/components/modelForm.tsx","./result/resultList":"scripts/components/result/resultList.tsx"}],"../node_modules/redux-thunk/es/index.js":[function(require,module,exports) {
 "use strict";
@@ -37308,7 +37310,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "52854" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53581" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
