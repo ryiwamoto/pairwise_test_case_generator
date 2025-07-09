@@ -1,53 +1,34 @@
 {
   "name": "pair-wise-test",
   "version": "1.0.0",
-  "main": "index.js",
-  "repository": "ssh://git@bitbucket.org/ryiwamoto/pair-wise-test.git",
-  "author": "ryiwamoto <konnpekigan@gmail.com>",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/classnames": "^2.2.10",
-    "@types/clipboard": "^2.0.1",
-    "@types/jest": "^25.1.4",
-    "@types/node": "^13.9.2",
-    "@types/react": "^16.9.23",
-    "@types/react-dom": "^16.9.5",
-    "@types/react-redux": "^7.1.7",
-    "@types/redux": "^3.6.0",
-    "bulma": "^0.8.0",
-    "classnames": "^2.2.6",
-    "clipboard": "^2.0.6",
-    "highlight.js": "^10.4.1",
-    "jest": "^25.1.0",
-    "parcel-bundler": "^1.12.4",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
-    "react-redux": "^7.2.0",
-    "redux": "^4.0.5",
-    "redux-persist": "^6.0.0",
-    "redux-thunk": "^2.3.0",
-    "ts-jest": "^25.2.1",
-    "tslint": "^6.1.0",
-    "tslint-config-prettier": "^1.18.0",
-    "tslint-react": "^4.2.0",
-    "typescript": "^3.8.3"
-  },
+  "type": "module",
   "scripts": {
-    "build": "rm -rf docs && parcel build ./gui/index.html --out-dir ./docs --public-url ./",
-    "build-watch": "parcel ./gui/index.html",
-    "test": "jest",
-    "test-watch": "jest --watch"
+    "dev": "vite",
+    "build": "tsc && vite build --outDir docs",
+    "preview": "vite preview",
+    "test": "vitest",
+    "test:ui": "vitest --ui"
   },
-  "jest": {
-    "preset": "ts-jest",
-    "testRegex": "/__tests__/.*spec\\.(ts|tsx|js)$",
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js",
-      "jsx",
-      "json",
-      "node"
-    ]
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "zustand": "^4.5.0",
+    "prism-react-renderer": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "autoprefixer": "^10.4.16",
+    "eslint": "^8.45.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.3",
+    "postcss": "^8.4.32",
+    "tailwindcss": "^3.3.6",
+    "typescript": "^5.0.2",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
   }
 }

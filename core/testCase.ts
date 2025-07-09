@@ -6,10 +6,8 @@ export class TestCase {
   public values: (number | null)[];
 
   constructor(values: (number | null)[]) {
-    if (process.env.NODE_ENV === "development") {
-      if (values.length <= 1) {
-        throw new Error("values must be 2 or more elements");
-      }
+    if (values.length <= 1) {
+      throw new Error("values must be 2 or more elements");
     }
     this.values = values;
   }
